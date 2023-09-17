@@ -113,6 +113,7 @@ class SQLite3toMySQL(SQLite3toMySQLAttributes):
         self._use_fulltext = kwargs.get("use_fulltext") or False
 
         self._with_rowid = kwargs.get("with_rowid") or False
+        self._append = kwargs.get("append") or True
 
         sqlite3.register_adapter(Decimal, adapt_decimal)
         sqlite3.register_converter("DECIMAL", convert_decimal)
@@ -654,18 +655,26 @@ class SQLite3toMySQL(SQLite3toMySQLAttributes):
                 if self._mysql_truncate_tables:
                     self._truncate_table(table["name"])
 
+                strId = -1
+                # get the last record id from dest table
+                self._mysql_cur.execute(f'SELECT MAX(ID) AS MAXID FROM {table["name"]}')
+                strId = self._mysql_cur.fetchone()[0]
+                self._logger.info(f'MAX ID: {strId} In {table["name"]}')
+
                 # get the size of the data
-                self._sqlite_cur.execute(f'SELECT COUNT(*) AS total_records FROM "{table["name"]}"')
+                self._sqlite_cur.execute(f'SELECT COUNT(*) AS total_records FROM "{table["name"]}" WHERE rowid>{strId}')
                 total_records = int(dict(self._sqlite_cur.fetchone())["total_records"])
+                self._logger.info(f'total_records {total_records} In {table["name"]} where id >{strId}')
 
                 # only continue if there is anything to transfer
                 if total_records > 0:
                     # populate it
                     self._logger.info("Transferring table %s", table["name"])
                     self._sqlite_cur.execute(
-                        '''SELECT {rowid} * FROM "{table_name}"'''.format(
+                        '''SELECT {rowid} * FROM "{table_name}" {where} '''.format(
                             rowid='rowid as "rowid",' if transfer_rowid else "",
                             table_name=table["name"],
+                            where=f' WHERE rowid>{strId}' if self._append else "",
                         )
                     )
                     columns: t.List[str] = [
