@@ -108,6 +108,7 @@ from .mysql_utils import MYSQL_INSERT_METHOD, MYSQL_TEXT_COLUMN_TYPES, mysql_sup
     "Will throw an error if your MySQL version does not support InnoDB FULLTEXT indexes!",
 )
 @click.option("--with-rowid", is_flag=True, help="Transfer rowid columns.")
+@click.option("--append", is_flag=True, help="Transfer append mode.")
 @click.option("-c", "--chunk", type=int, default=None, help="Chunk reading/writing SQL records")
 @click.option("-l", "--log-file", type=click.Path(), help="Log file")
 @click.option("-q", "--quiet", is_flag=True, help="Quiet. Display only errors.")
@@ -134,6 +135,7 @@ def cli(
     mysql_collation: str,
     use_fulltext: bool,
     with_rowid: bool,
+    append: bool,
     chunk: int,
     log_file: t.Union[str, "os.PathLike[t.Any]"],
     quiet: bool,
@@ -170,6 +172,7 @@ def cli(
             ignore_duplicate_keys=ignore_duplicate_keys,
             use_fulltext=use_fulltext,
             with_rowid=with_rowid,
+            append=append,
             chunk=chunk,
             log_file=log_file,
             quiet=quiet,
