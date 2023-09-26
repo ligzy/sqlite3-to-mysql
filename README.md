@@ -69,6 +69,7 @@ Options:
                                   throw an error if your MySQL version does
                                   not support InnoDB FULLTEXT indexes!
   --with-rowid                    Transfer rowid columns.
+  --with-append                   Transfer in append mode. Only to transfer new rows.
   -c, --chunk INTEGER             Chunk reading/writing SQL records
   -l, --log-file PATH             Log file
   -q, --quiet                     Quiet. Display only errors.
